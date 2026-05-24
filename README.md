@@ -7,7 +7,7 @@
 Dosyalarınızı içerik, ad, uzantı ve tarih gibi filtrelerle anında bulun.  
 Görev çubuğuna sabitlenebilen, sistem tepsisinde çalışan hafif bir arama motorudur.
 
-[![İndir](https://img.shields.io/badge/⬇_İndir-DeepScan_Local_Setup-blue?style=for-the-badge)](https://github.com/SedatTelli/deepscan-local/releases/latest)
+[![İndir](https://img.shields.io/badge/⬇_İndir-DeepScanLocal_Setup.zip-blue?style=for-the-badge)](https://github.com/SedatTelli/deepscan-local/releases/latest)
 [![Platform](https://img.shields.io/badge/Platform-Windows_10%2F11-0078D4?style=for-the-badge&logo=windows)](https://github.com/SedatTelli/deepscan-local/releases/latest)
 [![Lisans](https://img.shields.io/badge/Lisans-MIT-green?style=for-the-badge)](LICENSE)
 
@@ -29,15 +29,18 @@ Görev çubuğuna sabitlenebilen, sistem tepsisinde çalışan hafif bir arama m
 
 Aşağıdaki bağlantıya tıklayarak son sürümü indirin:
 
-**➡ [DeepScanLocal_Setup.exe — En Son Sürüm](https://github.com/SedatTelli/deepscan-local/releases/latest)**
+**➡ [DeepScanLocal_Setup.zip — En Son Sürüm](https://github.com/SedatTelli/deepscan-local/releases/latest)**
 
-### Adım 2 — Kurulumu Çalıştırın
+> 💡 **Neden ZIP?** Tarayıcılar ve Windows Defender, imzasız `.exe` dosyalarını direkt indirmede
+> bazen bloklar. ZIP içinden çıkartılan kurulum dosyası bu sorunu ortadan kaldırır.
 
-1. İndirilen `DeepScanLocal_Setup.exe` dosyasına çift tıklayın.
-2. **SmartScreen uyarısı çıkarsa:** "Daha fazla bilgi" → "Yine de çalıştır" deyin.  
-   *(Uyarı, sertifika olmaksızın dağıtılan tüm küçük uygulamalarda görünür — normaldir.)*
-3. Kurulum sihirbazını takip edin ve "Kur" düğmesine tıklayın.
-4. Program kurulup otomatik olarak başlar.
+### Adım 2 — ZIP'i Açın ve Kurun
+
+1. İndirilen `DeepScanLocal_Setup.zip` dosyasına **sağ tıklayın → "Tümünü Çıkart"**
+2. Çıkan klasördeki `DeepScanLocal_Setup.exe` dosyasına çift tıklayın
+3. **SmartScreen uyarısı çıkarsa:** "Daha fazla bilgi" → "Yine de çalıştır" deyin  
+   *(İmzasız tüm küçük uygulamalarda görünür — normaldir)*
+4. Kurulum sihirbazını takip edin → program kurulur ve başlar
 
 ### Adım 3 — Görev Çubuğuna Sabitleyin ⭐ (İlk Yapmanız Gereken)
 

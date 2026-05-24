@@ -277,8 +277,42 @@ def _make_icon(size: int = 64) -> Image.Image:
 
 
 def _save_ico(img: Image.Image) -> None:
+    """
+    Write a proper multi-resolution ICO to ICON_PATH.
+    Prefers copying the bundled/source icon.ico (7 sizes, 16–256 px) over
+    saving the PIL-generated one, which only has a few sizes and can produce
+    a blank taskbar icon on some Windows versions.
+    """
+    import shutil
+
+    # 1. Frozen bundle: icon.ico is packed next to the exe's _internal folder
+    if getattr(sys, "frozen", False):
+        bundled = Path(sys._MEIPASS) / "icon.ico"
+        if bundled.exists():
+            try:
+                shutil.copy2(str(bundled), str(ICON_PATH))
+                return
+            except Exception:
+                pass
+
+    # 2. Running from source: use the source icon.ico if it exists alongside main.py
+    src_ico = Path(__file__).with_name("icon.ico")
+    if src_ico.exists():
+        try:
+            shutil.copy2(str(src_ico), str(ICON_PATH))
+            return
+        except Exception:
+            pass
+
+    # 3. Fallback: save PIL-generated ICO with all standard Windows sizes
     try:
-        img.save(str(ICON_PATH), format="ICO", sizes=[(32, 32), (48, 48), (64, 64)])
+        sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+        frames = [img.resize((s, s), Image.LANCZOS) for s in [sz[0] for sz in sizes]]
+        frames[0].save(
+            str(ICON_PATH), format="ICO",
+            append_images=frames[1:],
+            sizes=sizes,
+        )
     except Exception as exc:
         log_error(f"Icon save: {exc}")
 
@@ -3330,9 +3364,33 @@ class DeepScanApp:
                 ]
 
             hinst = k32.GetModuleHandleW(None)
+
+            # LoadImageW returns HANDLE (pointer-size).  Without setting restype
+            # ctypes defaults to c_int (32-bit) which truncates the 64-bit handle
+            # on 64-bit Windows → invalid icon → blank taskbar button.
+            u32.LoadImageW.restype = ctypes.wintypes.HANDLE
+
+            IMAGE_ICON      = 1
+            LR_LOADFROMFILE = 0x00000010
+            LR_DEFAULTSIZE  = 0x00000040
+
+            # Load icon BEFORE RegisterClass so wc.hIcon can be set.
+            # This ensures the taskbar thumbnail always has the correct icon.
+            hicon = None
+            if ICON_PATH.exists():
+                hicon = u32.LoadImageW(
+                    None, str(ICON_PATH), IMAGE_ICON, 0, 0,
+                    LR_LOADFROMFILE | LR_DEFAULTSIZE,
+                )
+            if not hicon:
+                hicon = u32.LoadImageW(
+                    hinst, None, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE,
+                )
+
             wc = _WNDCLASS()
             wc.lpfnWndProc   = _proc_ref
             wc.hInstance     = hinst
+            wc.hIcon         = hicon or 0   # set class icon → taskbar uses this
             wc.lpszClassName = "DSL_TBBtn_v3"
             wc.hbrBackground = ctypes.c_void_p(6)  # COLOR_WINDOW
             u32.RegisterClassW(ctypes.byref(wc))
@@ -3357,27 +3415,9 @@ class DeepScanApp:
             u32.ShowWindow(hwnd, 1)
             u32.UpdateWindow(hwnd)
 
-            # Load and apply the app's search icon to the taskbar button.
-            # Prefer the AppData icon (created at startup); fall back to the
-            # exe's own embedded icon (IMAGE_ICON from the module handle).
-            IMAGE_ICON      = 1
-            LR_LOADFROMFILE = 0x00000010
-            LR_DEFAULTSIZE  = 0x00000040
-            WM_SETICON      = 0x0080
-
-            hicon = None
-            if ICON_PATH.exists():
-                hicon = u32.LoadImageW(
-                    None, str(ICON_PATH), IMAGE_ICON, 0, 0,
-                    LR_LOADFROMFILE | LR_DEFAULTSIZE,
-                )
-
-            if not hicon:
-                # Fallback: load icon embedded in the executable itself
-                hicon = u32.LoadImageW(
-                    hinst, None, IMAGE_ICON, 0, 0, LR_DEFAULTSIZE,
-                )
-
+            # Apply icon to the window instance as well (belt-and-suspenders).
+            # wc.hIcon already set the class-level icon above.
+            WM_SETICON = 0x0080
             if hicon:
                 u32.SendMessageW(hwnd, WM_SETICON, 1, hicon)   # ICON_BIG
                 u32.SendMessageW(hwnd, WM_SETICON, 0, hicon)   # ICON_SMALL
