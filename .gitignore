@@ -1,0 +1,41 @@
+# Build artifacts
+build/
+dist*/
+*.spec
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+venv/
+.venv/
+env/
+
+# Database & user data
+*.db
+*.sqlite3
+
+# Logs & temp
+*.log
+error_log.txt
+
+# Installer files (distribute separately)
+installer/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Debug screenshots
+_*.png
+_*.jpg
+
+# VBS launcher (generated)
+DeepScanLocal.vbs
+
+# Spec overrides (keep deepscan.spec)
